@@ -1,4 +1,6 @@
 using Infrastructure;
+using Application;
+using Web.Endpoints;
 namespace Web
 {
     public class Program
@@ -14,7 +16,7 @@ namespace Web
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddInfrastructureServices(builder.Configuration);
-
+            builder.Services.AddApplicationServices();
 
             var app = builder.Build();
 
@@ -31,6 +33,7 @@ namespace Web
 
 
             app.MapControllers();
+
 
             app.Run();
         }
