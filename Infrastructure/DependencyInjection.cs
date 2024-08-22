@@ -16,8 +16,10 @@ namespace Infrastructure
     {
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<ApplicationDbContext>(( options) =>
+            services.AddDbContext<ApplicationDbContext>((sp, options) =>
             {
+                var configuration = sp.GetRequiredService<IConfiguration>();
+
 
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });
