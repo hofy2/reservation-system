@@ -2,7 +2,9 @@
 using Domin.Entities;
 using Domin.interfaces;
 using FluentValidation;
+using Infrastructure.Data;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +20,30 @@ namespace Application.Reservations.Commands.UpdateReservation
         public DateTime ReservationDate { get; set; }
         public string Notes { get; set; }
     }
+    public class UpdateReservationCommandValidator : AbstractValidator<UpdateReservationCommand>
+    {
+        private readonly ApplicationDbContext _context;
 
+        public UpdateReservationCommandValidator(ApplicationDbContext context)
+        {
+            _context = context;
+
+            RuleFor(x => x.CustomerName)
+                .NotEmpty().WithMessage("Customer Name is required.")
+                .MaximumLength(100).WithMessage("Customer Name must not exceed 100 characters.");
+
+            RuleFor(x => x.ReservationDate)
+                .GreaterThanOrEqualTo(DateTime.UtcNow).WithMessage("Reservation Date cannot be in the past.");
+
+            RuleFor(x => x.Id)
+                 .MustAsync(ReservationExists)
+                .GreaterThan(0).WithMessage("Reservation ID must be greater than 0.");
+        }
+        private async Task<bool> ReservationExists(int id, CancellationToken cancellationToken)
+        {
+            return await _context.Reservations.AnyAsync(m => m.Id == id, cancellationToken);
+        }
+    }
     public class UpdateReservationCommandHandler : IRequestHandler<UpdateReservationCommand>
     {
         private readonly IGenericRepository<Reservation> _reservationRepository;
@@ -27,29 +52,12 @@ namespace Application.Reservations.Commands.UpdateReservation
         {
             _reservationRepository = reservationRepository;
         }
-        public class UpdateReservationCommandValidator : AbstractValidator<UpdateReservationCommand>
-        {
-            public UpdateReservationCommandValidator()
-            {
-                RuleFor(x => x.CustomerName)
-                    .NotEmpty().WithMessage("Customer Name is required.")
-                    .MaximumLength(100).WithMessage("Customer Name must not exceed 100 characters.");
 
-                RuleFor(x => x.ReservationDate)
-                    .GreaterThanOrEqualTo(DateTime.UtcNow).WithMessage("Reservation Date cannot be in the past.");
-
-                RuleFor(x => x.Id)
-                    .GreaterThan(0).WithMessage("Reservation ID must be greater than 0.");
-            }
-        }
         public async Task Handle(UpdateReservationCommand request, CancellationToken cancellationToken)
         {
             var reservation = await _reservationRepository.GetByIdAsync(request.Id);
 
-            if (reservation == null)
-            {
-                throw new NotFoundException(nameof(Reservation), request.Id);
-            }
+
 
             reservation.CustomerName = request.CustomerName;
             reservation.ReservationDate = request.ReservationDate;

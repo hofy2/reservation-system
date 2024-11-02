@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Domin.Entities;
 using FluentValidation;
+using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 namespace Application.Reservations.Commands.CreateReservation
 {
     public class CreateReservationCommand : IRequest<int>
@@ -20,18 +22,26 @@ namespace Application.Reservations.Commands.CreateReservation
     }
     public class CreateReservationCommandValidator : AbstractValidator<CreateReservationCommand>
     {
-        public CreateReservationCommandValidator()
+        private readonly ApplicationDbContext _context;
+
+        public CreateReservationCommandValidator(ApplicationDbContext context)
         {
+            _context = context;
+
+
             RuleFor(x => x.CustomerName)
                 .NotEmpty().WithMessage("Customer Name is required.")
                 .MaximumLength(100).WithMessage("Customer Name must not exceed 100 characters.");
 
-            RuleFor(x => x.ReservationDate)
-                .GreaterThanOrEqualTo(DateTime.UtcNow).WithMessage("Reservation Date cannot be in the past.");
 
+
+            RuleFor(x => x.UserId).
+            NotEmpty().WithMessage("Customer Name is required.");
+            
             RuleFor(x => x.TripId)
                 .GreaterThan(0).WithMessage("Trip ID must be greater than 0.");
         }
+
     }
     public class CreateReservationCommandHandler : IRequestHandler<CreateReservationCommand, int>
     {
@@ -44,19 +54,22 @@ namespace Application.Reservations.Commands.CreateReservation
 
         public async Task<int> Handle(CreateReservationCommand request, CancellationToken cancellationToken)
         {
-            var reservation = new Reservation
-            {
-                ReservedById = request.UserId,
-                CustomerName = request.CustomerName,
-                TripId = request.TripId,
-                ReservationDate = request.ReservationDate,
-                CreationDate = DateTime.UtcNow,
-                Notes = request.Notes
-            };
+            
+                var reservation = new Reservation
+                {
+                    ReservedById = request.UserId,
+                    CustomerName = request.CustomerName,
+                    TripId = request.TripId,
+                    ReservationDate = request.ReservationDate,
+                    CreationDate = DateTime.UtcNow,
+                    Notes = request.Notes
+                };
 
-            await _reservationRepository.AddAsync(reservation);
+                await _reservationRepository.AddAsync(reservation);
 
-            return reservation.Id;
+                return reservation.Id;
+            
+         
         }
     }
 }

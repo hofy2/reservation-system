@@ -1,23 +1,19 @@
-﻿using Domin.Entities;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Domin.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
         private readonly IConfiguration _configuration;
-
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IConfiguration configuration) : base(options) {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IConfiguration configuration) : base(options)
+        {
             _configuration = configuration;
         }
 
-        public DbSet<User> Users { get; set; }
         public DbSet<Trip> Trips { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
 
@@ -25,37 +21,59 @@ namespace Infrastructure.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure User-Reservation relationship
+            // Define relationships for Reservation
             modelBuilder.Entity<Reservation>()
                 .HasOne(r => r.ReservedBy)
                 .WithMany(u => u.Reservations)
                 .HasForeignKey(r => r.ReservedById);
 
-            // Configure Trip-Reservation relationship
             modelBuilder.Entity<Reservation>()
                 .HasOne(r => r.Trip)
                 .WithMany(t => t.Reservations)
                 .HasForeignKey(r => r.TripId);
 
             modelBuilder.Entity<Trip>()
-                .Property(p => p.Price).HasColumnName("decimal(18,2)");
-            // Seed users and trips
+               .Property(p => p.Price).HasColumnName("decimal(18,2)");
 
-            var users = _configuration.GetSection("SeedData:Users").Get<List<User>>();
+
+            // Seed roles and users
             var trips = _configuration.GetSection("SeedData:Trips").Get<List<Trip>>();
-
-            modelBuilder.Entity<User>().HasData(users);
             modelBuilder.Entity<Trip>().HasData(trips);
 
-            //     modelBuilder.Entity<User>().HasData(
-            //    new User { Id = 1, Email = "user1@example.com", Password = "password1" },
-            //    new User { Id = 2, Email = "user2@example.com", Password = "password2" }
-            //);
+            modelBuilder.Entity<IdentityRole<int>>().HasData(
+                new IdentityRole<int> { Id = 1, Name = "Admin", NormalizedName = "ADMIN" },
+                new IdentityRole<int> { Id = 2, Name = "Customer", NormalizedName = "CUSTOMER" }
+            );
 
-            //     modelBuilder.Entity<Trip>().HasData(
-            //         new Trip { Id = 1, Name = "Trip to Paris", CityName = "Paris", Price = 1000, ImageUrl = "image_url", Content = "<p>Beautiful trip to Paris</p>", CreationDate = DateTime.UtcNow },
-            //         new Trip { Id = 2, Name = "Trip to Rome", CityName = "Rome", Price = 1200, ImageUrl = "image_url", Content = "<p>Amazing trip to Rome</p>", CreationDate = DateTime.UtcNow }
-            //     );
+            var adminUser = new User
+            {
+                Id = 1,
+                UserName = "admin",
+                NormalizedUserName = "ADMIN",
+                Email = "admin@example.com",
+                NormalizedEmail = "ADMIN@EXAMPLE.COM",
+                EmailConfirmed = true,
+                PasswordHash = new PasswordHasher<User>().HashPassword(null, "Admin@123")
+            };
+
+            var customerUser = new User
+            {
+                Id = 2,
+                UserName = "customer",
+                NormalizedUserName = "CUSTOMER",
+                Email = "customer@example.com",
+                NormalizedEmail = "CUSTOMER@EXAMPLE.COM",
+                EmailConfirmed = true,
+                PasswordHash = new PasswordHasher<User>().HashPassword(null, "Customer@123")
+            };
+
+            modelBuilder.Entity<User>().HasData(adminUser, customerUser);
+
+            // Assign roles
+            modelBuilder.Entity<IdentityUserRole<int>>().HasData(
+                new IdentityUserRole<int> { RoleId = 1, UserId = 1 }, // Admin role to Admin user
+                new IdentityUserRole<int> { RoleId = 2, UserId = 2 }  // Customer role to Customer user
+            );
         }
-        }
+    }
 }
