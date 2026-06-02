@@ -14,11 +14,15 @@ namespace Application.Reservations.Commands.CreateReservation
 {
     public class CreateReservationCommand : IRequest<int>
     {
-        public int UserId { get; set; }
+        internal int UserId { get; private set; }
         public string CustomerName { get; set; }
         public int TripId { get; set; }
         public DateTime ReservationDate { get; set; }
         public string Notes { get; set; }
+        public void SetUserId(int userId)  
+        {
+            UserId = userId;
+        }
     }
     public class CreateReservationCommandValidator : AbstractValidator<CreateReservationCommand>
     {
@@ -35,11 +39,17 @@ namespace Application.Reservations.Commands.CreateReservation
 
 
 
-            RuleFor(x => x.UserId).
-            NotEmpty().WithMessage("Customer Name is required.");
-            
+
+
             RuleFor(x => x.TripId)
-                .GreaterThan(0).WithMessage("Trip ID must be greater than 0.");
+            .GreaterThan(0).WithMessage("Trip ID must be greater than 0.")
+            .Must(TripExists).WithMessage("Trip ID does not exist.");
+
+        }
+
+        private  bool TripExists(int tripId)
+        {
+            return  _context.Trips.Any(trip => trip.Id == tripId);
         }
 
     }
@@ -68,8 +78,8 @@ namespace Application.Reservations.Commands.CreateReservation
                 await _reservationRepository.AddAsync(reservation);
 
                 return reservation.Id;
-            
-         
+        
+
         }
     }
 }

@@ -9,6 +9,11 @@ namespace Infrastructure.Data
     public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
         private readonly IConfiguration _configuration;
+
+        public ApplicationDbContext()
+        {
+        }
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IConfiguration configuration) : base(options)
         {
             _configuration = configuration;

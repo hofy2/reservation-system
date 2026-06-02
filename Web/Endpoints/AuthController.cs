@@ -52,7 +52,8 @@ namespace API.Controllers
     {
         new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        new Claim("id",user.Id.ToString())
     };
 
             // Add the user's roles to the token
@@ -60,6 +61,10 @@ namespace API.Controllers
             foreach (var role in roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+            foreach (var claim in claims)
+            {
+                Console.WriteLine($"{claim.Type}: {claim.Value}");
             }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));

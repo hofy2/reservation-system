@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "Infrastru
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Web", "Web\Web.csproj", "{9192CDE6-D7AA-4E4A-A305-0555B2616C1B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\Application.csproj", "{DBE85F7D-2DD8-4791-A675-1B3AB9461248}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application", "Application\Application.csproj", "{DBE85F7D-2DD8-4791-A675-1B3AB9461248}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reservations.Tests", "Reservation.Tests\Reservations.Tests.csproj", "{854A4731-80C8-4069-987B-545BCF94113C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{DBE85F7D-2DD8-4791-A675-1B3AB9461248}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DBE85F7D-2DD8-4791-A675-1B3AB9461248}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DBE85F7D-2DD8-4791-A675-1B3AB9461248}.Release|Any CPU.Build.0 = Release|Any CPU
+		{854A4731-80C8-4069-987B-545BCF94113C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{854A4731-80C8-4069-987B-545BCF94113C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{854A4731-80C8-4069-987B-545BCF94113C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{854A4731-80C8-4069-987B-545BCF94113C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

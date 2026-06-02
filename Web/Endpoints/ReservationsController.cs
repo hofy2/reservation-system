@@ -9,6 +9,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Web.Endpoints
 {
@@ -45,11 +46,23 @@ namespace Web.Endpoints
 
         public async Task<IActionResult> CreateReservation(CreateReservationCommand command)
         {
+          //  var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            //command.SetUserId(userId);
+
+            var userIdClaim = int.Parse( User.FindFirstValue("id"));
+     
+            command.SetUserId(userIdClaim);
+
+
+
             var reservationId = await _mediator.Send(command);
-           BackgroundJob.Enqueue<ReservationService>(service => service.DeleteFirstReservation());
+          //  BackgroundJob.Enqueue<ReservationService>(service => service.DeleteFirstReservation());
 
             return Ok(reservationId); ;
         }
+
+
+
 
 
 
